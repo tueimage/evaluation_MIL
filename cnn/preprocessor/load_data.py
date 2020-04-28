@@ -4,7 +4,8 @@ from keras.preprocessing import image
 import os
 from pathlib import Path
 from keras.applications.resnet50 import preprocess_input
-from sklearn.cross_validation import StratifiedShuffleSplit
+#from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import GroupShuffleSplit
 import imagesize
 
