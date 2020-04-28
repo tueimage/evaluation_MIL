@@ -5,33 +5,47 @@ import cnn.nn_architecture.keras_generators as gen
 from cnn.keras_utils import normalize, save_evaluation_results, plot_roc_curve, plot_confusion_matrix
 
 
-def predict_patch_and_save_results(saved_model, file_unique_name, data_set, processed_y,
-                                   test_batch_size, box_size, image_size, res_path, mura_interpolation):
+def predict_patch_and_save_results(saved_model, file_unique_name, data_set,
+                                   processed_y, test_batch_size, box_size,
+                                   image_size, res_path, mura_interpolation):
+    
+    # Generate testing batches
     test_generator = gen.BatchGenerator(
-        instances=data_set.values,
-        batch_size=test_batch_size,
-        net_h=image_size,
-        net_w=image_size,
-        box_size=box_size,
-        norm=normalize,
-        processed_y=processed_y,
-        shuffle=False,
-        interpolation=mura_interpolation
+        instances      = data_set.values,
+        batch_size     = test_batch_size,
+        net_h          = image_size,
+        net_w          = image_size,
+        box_size       = box_size,
+        norm           = normalize,
+        processed_y    = processed_y,
+        shuffle        = False,
+        interpolation  = mura_interpolation
     )
 
-    predictions = saved_model.predict_generator(test_generator, steps=test_generator.__len__(), workers=1)
+    # Apply the network to the testing batches and save to a file
+    predictions = saved_model.predict_generator(test_generator,
+                                                steps = test_generator.__len__(),
+                                                workers = 1)
     np.save(res_path + 'predictions_' + file_unique_name, predictions)
 
     all_img_ind = []
     all_patch_labels = []
+    
+    # For every batch
     for batch_ind in range(test_generator.__len__()):
-        x, y = test_generator.__getitem__(batch_ind)
-        y_cast = y.astype(np.float32)
-        res_img_ind = test_generator.get_batch_image_indices(batch_ind)
-        all_img_ind = combine_predictions_each_batch(res_img_ind, all_img_ind, batch_ind)
+        
+        # Get the patch labels
+        x, y             = test_generator.__getitem__(batch_ind)
+        y_cast           = y.astype(np.float32)
+        
+        # Concatenate the image indices
+        res_img_ind      = test_generator.get_batch_image_indices(batch_ind)
+        all_img_ind      = combine_predictions_each_batch(res_img_ind, all_img_ind, batch_ind)
         all_patch_labels = combine_predictions_each_batch(y_cast, all_patch_labels, batch_ind)
+    
+    # Save the batch image indices and the patch labels to files
     np.save(res_path + 'image_indices_' + file_unique_name, all_img_ind)
-    np.save(res_path + 'patch_labels_' + file_unique_name, all_patch_labels)
+    np.save(res_path + 'patch_labels_'  + file_unique_name, all_patch_labels)
 
 
 def get_patch_labels_from_batches(generator, path, file_name):

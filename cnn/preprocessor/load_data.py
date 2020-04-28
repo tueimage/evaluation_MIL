@@ -9,7 +9,9 @@ from sklearn.model_selection import GroupShuffleSplit
 import imagesize
 
 from cnn.keras_utils import visualize_population
+
 np.random.seed(0)
+
 FINDINGS = ['Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema', 'Effusion', 'Emphysema',
             'Fibrosis', 'Hernia', 'Infiltration', 'Mass', 'Nodule', 'Pleural_Thickening',
             'Pneumonia', 'Pneumothorax']
@@ -41,7 +43,10 @@ def get_label_by_imageind(label_df, image_ind):
 
 
 def add_label_columns(df):
+    '''Adds a discretization of the dataset labels'''
+    
     df['Bbox'] = pd.Series(0, index=df.index).astype(int)
+    
     for label in FINDINGS:
         new_column = df['Finding Labels'].str.contains(label)
         # add new column and fill in with result above and attach to the initial df
@@ -92,18 +97,29 @@ def reorder_rows(df):
 
 
 def preprocess_labels(Yclass, path_to_png):
+    '''Match the database to the dataset entries.'''
+    
+    # Duplicate the input database
     xy_df = Yclass.copy(deep=True)
-    xy_df['Image Found'] = None
+    
+    # Add new empty columns
+    xy_df['Image Found']   = None
     xy_df['Reorder Index'] = None
-    xy_df['Dir Path'] = None
+    xy_df['Dir Path']      = None
 
+    # Match all dataset images to the database
     for src_path in Path(path_to_png).glob('**/*.png'):
         image_ind = os.path.basename(src_path)
         xy_df.loc[xy_df['Image Index'] == image_ind, ['Dir Path']] = str(src_path)
+
     print("xy before dropping")
     print(xy_df.shape)
+    
+    # Drop all database entries of images not present in the dataset
     xy_df = xy_df.dropna(subset=['Dir Path'])
+    
     print(xy_df.shape)
+    
     return reorder_rows(xy_df)
 
 
@@ -116,26 +132,31 @@ def translate_on_patches(x_min, y_min, x_max, y_max):
 
 
 def couple_location_labels(Y_loc_dir, Y_class, P, out_dir):
+    
+    # Import database with adjusted column names
     Y_loc = rename_columns(load_csv(Y_loc_dir), False)
-
+        
+    # Add location annotations
     for diagnosis in FINDINGS:
-        Y_class[[diagnosis + '_loc','Bbox']]= Y_class.apply(lambda x: pd.Series(integrate_annotations(x, Y_loc, diagnosis, P)), axis=1)
-
-    Y_class.to_csv(out_dir+'/processed_new_Y.csv')
+        Y_class[[diagnosis + '_loc','Bbox']] = Y_class.apply(lambda x: pd.Series(integrate_annotations(x, Y_loc, diagnosis, P)), axis=1)
+    
+    # Save the processed database to a file
+    Y_class.to_csv(out_dir + '/processed_new_Y.csv')
     return Y_class
 
 
 def create_label_matrix_classification(row, label, P):
-    if row[label]==1:
+    
+    # If the label is present in the row, create a PxP matrix with ones
+    if row[label] == 1:
         im_q = np.ones((P, P), np.float)
-        # str(test_str).replace('\n', '')
         return str(im_q).replace('\n', '')
-        # return im_q
 
+    # If the label is not present in the row, create a PxP matrix with zeross
     else:
         im_q = np.zeros((P, P), np.float)
-        # return im_q
         return str(im_q).replace('\n', '')
+
 
 def make_label_matrix_localization_v2(P, x_min, y_min, x_max, y_max):
     im_q = np.zeros((P, P), np.float)
@@ -148,15 +169,18 @@ def get_all_bbox_for_image(row, Y_loc):
 
 
 def integrate_annotations(row, Y_loc, diagnosis, P):
+
     result_image_class = []
     all_rows, row_classif_df = get_all_bbox_for_image(row, Y_loc)
-
+    
     # if no bbox is found for this image
-    if all_rows.values.size==0:
+    if all_rows.values.size == 0:
+        # Create a matrix of the size of the image (PxP) with either 1s or 0s
         y_mat = create_label_matrix_classification(row, diagnosis, P)
-
         result_image_class.append(y_mat)
         return [y_mat, 0]
+    
+    # if there is a boundary box
     else:
 
         if diagnosis in all_rows['Finding Label'].values:
@@ -192,7 +216,7 @@ def create_label_matrix_localization(row, row_classif_df, diagnosis, P):
 
 
 def translate_coords_to_new_image_size(x, y, w, h, scale_x, scale_y):
-    x_min = x/ scale_x
+    x_min = x / scale_x
     y_min = y / scale_y
     x_max = x_min + w / scale_x
     y_max = y_min + h / scale_y
@@ -300,16 +324,27 @@ def keep_index_and_1diagnose_columns(Y, y_column_name):
 
 
 def keep_observations_of_positive_patients(Y, res_path, class_name):
-        Y['keep_patient'] = -1
-        # keep_patient_flag = df.apply(lambda x: get_patient_substring(x), axis=1)
-        res = Y.groupby(['Patient ID'])
-        for name, group in res:
-            keep_patient_flag = np.max(np.asarray(group[class_name]))
-            Y.loc[Y['Patient ID'] == name, 'keep_patient'] = keep_patient_flag
+    '''Filter patients with >= 1 postitive image for the class category.'''
+    
+    # Consider all database entries for removal
+    Y['keep_patient'] = -1
+   
+    # keep_patient_flag = df.apply(lambda x: get_patient_substring(x), axis=1)
+    
+    # For every patient ID, mark keep_patient_flag as 1 if one of patients'
+    # images returns positive for the class category
+    res = Y.groupby(['Patient ID'])
+    for name, group in res:
+        keep_patient_flag = np.max(np.asarray(group[class_name]))
+        Y.loc[Y['Patient ID'] == name, 'keep_patient'] = keep_patient_flag
 
-        Y2 = Y.loc[(Y['keep_patient'])==1]
-        Y2.to_csv(res_path + "processed_"+ class_name + ".csv")
-        return Y2
+    # Copy all marked patients to a new database
+    Y2 = Y.loc[(Y['keep_patient']) == 1]
+    
+    # Save the new database to a file
+    Y2.to_csv(res_path + "processed_" + class_name + ".csv")
+    
+    return Y2
 
 
 def get_rows_from_indices(df, train_inds, test_inds):
@@ -319,10 +354,17 @@ def get_rows_from_indices(df, train_inds, test_inds):
 # Lastly, We use 80% annotated images and 50% unanno-tated images to train the model and evaluate
 #  on the other 20% annotated images in each fold.
 def get_train_test(Y, random_state=None, do_stats=False, res_path =None, label_col=None):
+    
     classification, bbox = separate_localization_classification_labels(Y, label_col)
 
-    _, _, df_class_train, df_class_test = split_test_train_v2(classification, test_ratio=0.2, random_state=random_state)
-    train_bbox_idx, _, df_bbox_train, df_bbox_test = split_test_train_v2(bbox, test_ratio=0.2, random_state=random_state)
+    _, _, df_class_train, df_class_test = split_test_train_v2(
+                                              classification, test_ratio=0.2,
+                                              random_state = random_state)
+    
+    train_bbox_idx, _, df_bbox_train, df_bbox_test = split_test_train_v2(
+                                                         bbox, test_ratio=0.2,
+                                                         random_state = random_state)
+    
     print("BBO TRAIN train test")
     print(df_bbox_train.shape)
     print(df_bbox_test.shape)
@@ -492,14 +534,33 @@ def get_train_subset_xray(orig_train_set, train_bbox_nr, random_seed, ratio_to_k
 
 def load_xray(skip_processing, processed_labels_path, classication_labels_path, image_path, localization_labels_path,
               results_path, class_name):
+    '''Initialize the X-Ray dataset'''
+    
+    # No processing: load already processed database
     if skip_processing:
         filtered_patients_df = load_csv(processed_labels_path)
+        
         print('Cardiomegaly label division')
         print(filtered_patients_df['Cardiomegaly'].value_counts())
+    
+    # Create a new database
     else:
+        
+        # Categorize the database entry labels
         label_df = get_classification_labels(classication_labels_path, False)
+        
+        ## TODO: Only when input length != database length
+        # Match the database to the dataset images.
+        print('\nMatch the database to the dataset images.')
         processed_df = preprocess_labels(label_df, image_path)
+        
+        # Add location annotations
+        print('Add location annotations')
         xray_df = couple_location_labels(localization_labels_path, processed_df, PATCH_SIZE, results_path)
+        
+        ## TODO: Move up for speed
+        # Filter patients with >= 1 postitive image for the class category
+        print('Filter patients with >= 1 postitive image for the class category')
         filtered_patients_df = keep_observations_of_positive_patients(xray_df, results_path, class_name)
 
     return filtered_patients_df
