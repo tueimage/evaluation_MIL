@@ -373,23 +373,26 @@ def get_train_test(Y, random_state=None, do_stats=False, res_path =None, label_c
     train_clas_idx, _, df_class_train, df_class_val = split_test_train_v2(df_class_train, test_ratio=0.2, random_state=random_state)
 
     train_idx = np.concatenate((train_clas_idx, train_bbox_idx), axis=None)
-    df_train = pd.concat([df_class_train, df_bbox_train])
-    df_val = df_class_val
+    df_train  = pd.concat([df_class_train, df_bbox_train])
+    df_val    = df_class_val
 
     if do_stats and res_path is not None:
-        visualize_population(Y, 'whole_df_group', res_path, FINDINGS)
-        visualize_population(df_train, 'train_group', res_path, FINDINGS)
-        visualize_population(df_val, 'validation_group', res_path, FINDINGS)
-        visualize_population(df_bbox_test, 'test_bbox_group', res_path, FINDINGS)
+        visualize_population(Y,             'whole_df_group',   res_path, FINDINGS)
+        visualize_population(df_train,      'train_group',      res_path, FINDINGS)
+        visualize_population(df_val,        'validation_group', res_path, FINDINGS)
+        visualize_population(df_bbox_test,  'test_bbox_group',  res_path, FINDINGS)
         visualize_population(df_class_test, 'test_class_group', res_path, FINDINGS)
         visualize_population(pd.concat([df_bbox_test, df_class_test]), 'test_group', res_path, FINDINGS)
 
     label_patches = label_col + '_loc'
+    
     if label_col is not None:
         train_set, val_set = keep_index_and_1diagnose_columns(df_train, label_patches),\
                              keep_index_and_1diagnose_columns(df_val,  label_patches)
+                             
         bbox_test, class_test = keep_index_and_1diagnose_columns(df_bbox_test,  label_patches),\
                                 keep_index_and_1diagnose_columns(df_class_test,  label_patches)
+                                
         bbox_train = keep_index_and_1diagnose_columns(df_bbox_train, label_patches)
 
     return train_idx, train_set, val_set, bbox_test, class_test, bbox_train
@@ -505,12 +508,17 @@ def get_train_test_CV(Y, splits_nr, current_split, random_seed,  label_col, rati
     bbox_train_col, bbox_test_col = split_test_train_v3(bbox, splits_nr, test_ratio=0.2,
                                                         random_state=random_seed)
     # Here also train test is divided into train and validation
-    train_set, val_set, test_set, df_bbox_train, df_bbox_test, train_only_class = construct_train_test_CV(classification, class_train_col, class_test_col,
-                                                                    bbox, bbox_train_col, bbox_test_col,
-                                                                    random_state=random_seed,
-                                                                    diagnose_col=label_col+'_loc', split= current_split,
-                                                                    val_ratio=0.2,
-                                                                    train_subset_ratio=ratio_to_keep)
+    train_set, val_set, test_set, df_bbox_train, \
+        df_bbox_test, train_only_class = construct_train_test_CV(
+                                             classification, class_train_col,
+                                             class_test_col, bbox,
+                                             bbox_train_col, bbox_test_col,
+                                             random_state = random_seed,
+                                             diagnose_col = label_col + '_loc',
+                                             split        = current_split,
+                                             val_ratio    = 0.2,
+                                             train_subset_ratio = ratio_to_keep)
+        
     print("bbox for train "+ str(df_bbox_train.shape))
     print("bbox for test "+ str(df_bbox_test.shape))
     print("total train set size is "+str(train_set.shape))
