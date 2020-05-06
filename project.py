@@ -28,7 +28,7 @@ mode = config['mode']
 
 
 # Initialize datasets for training, validation and testing
-# df_labels, df_labels_test = import_dataset(config)
+df_labels, df_labels_test = import_dataset(config)
 
 # Generate separate datasets for training, validation and testing
 df_train, df_val, df_test = prepare_dataset(config, df_labels, df_labels_test)
