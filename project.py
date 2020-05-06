@@ -1,12 +1,10 @@
 import argparse
-import os
 import yaml
+import pandas as pd
 
-from cnn.preprocessor import import_dataset, prepare_dataset
-
-
-## Select a custom GPU (Tensorflow v1) ----------------------------------------
-#os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+from cnn.generalized.import_dataset import import_dataset
+from cnn.generalized.prepare_dataset import prepare_dataset
+from cnn.generalized.train_model import train_model
 
 
 ## Add handler for the global configuration file ==============================
@@ -23,14 +21,34 @@ args   = parser.parse_args()
 config = load_config(args.config_path)
 
 
-## Initialize datasets for training, validation and testing ===================
+## ============================================================================
 
-print()
+dataset = config['dataset']
+mode = config['mode']
 
-# TODO: Add validation step?
 
-df_labels, df_labels_test = import_dataset(config)
+# Initialize datasets for training, validation and testing
+# df_labels, df_labels_test = import_dataset(config)
 
-df_train, df_val, df_test = prepare_dataset(config, df_labels, df_labels_test)
+# # Generate separate datasets for training, validation and testing
+# df_train, df_val, df_test = prepare_dataset(config, df_labels, df_labels_test)
 
-del df_labels, df_labels_test
+# # Save the databases to a file
+# df_train.to_hdf( str(dataset)+'.hdf5', 'df_train')
+# df_val.to_hdf(   str(dataset)+'.hdf5', 'df_val')
+# df_test.to_hdf(  str(dataset)+'.hdf5', 'df_test')
+
+# del df_labels, df_labels_test
+
+
+## ============================================================================
+
+if mode == 'train':
+    
+    # Load the databases
+    df_train = pd.read_hdf(str(dataset)+'.hdf5', 'df_train')
+    df_val   = pd.read_hdf(str(dataset)+'.hdf5', 'df_val')
+    df_test  = pd.read_hdf(str(dataset)+'.hdf5', 'df_test')
+    
+    train_model(config, df_train, df_val, df_test)
+
