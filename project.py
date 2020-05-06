@@ -30,15 +30,15 @@ mode = config['mode']
 # Initialize datasets for training, validation and testing
 # df_labels, df_labels_test = import_dataset(config)
 
-# # Generate separate datasets for training, validation and testing
-# df_train, df_val, df_test = prepare_dataset(config, df_labels, df_labels_test)
+# Generate separate datasets for training, validation and testing
+df_train, df_val, df_test = prepare_dataset(config, df_labels, df_labels_test)
 
-# # Save the databases to a file
-# df_train.to_hdf( str(dataset)+'.hdf5', 'df_train')
-# df_val.to_hdf(   str(dataset)+'.hdf5', 'df_val')
-# df_test.to_hdf(  str(dataset)+'.hdf5', 'df_test')
+# Save the databases to a file
+df_train.to_hdf( str(dataset)+'.hdf5', 'df_train')
+df_val.to_hdf(   str(dataset)+'.hdf5', 'df_val')
+df_test.to_hdf(  str(dataset)+'.hdf5', 'df_test')
 
-# del df_labels, df_labels_test
+del df_labels, df_labels_test
 
 
 ## ============================================================================
