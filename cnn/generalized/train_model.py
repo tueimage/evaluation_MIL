@@ -6,7 +6,7 @@ import numpy as np
 import cnn.nn_architecture.keras_generators as gen
 
 IMAGE_SIZE = 512
-BATCH_SIZE = 8
+BATCH_SIZE = 1
 BOX_SIZE = 16
 
 
@@ -26,7 +26,7 @@ def train_model(config, df_train, df_val, df_test):
 
     ## 1. Generate training and validation batches ============================
     
-    # Define generator for training batches
+    # Generate training batches
     train_generator = gen.BatchGenerator(
         instances     = df_train.values,
         batch_size    = BATCH_SIZE,
@@ -38,7 +38,7 @@ def train_model(config, df_train, df_val, df_test):
         processed_y   = skip_processing,
         interpolation = mura_interpolation)
 
-    # Define generator for validation batches
+    # Generate validation batches
     valid_generator = gen.BatchGenerator(
         instances     = df_val.values,
         batch_size    = BATCH_SIZE,
