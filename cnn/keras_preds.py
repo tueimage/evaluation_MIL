@@ -68,13 +68,14 @@ def load_npy(file_name, res_path):
 
 
 def get_index_label_prediction(file_set_name, res_path):
-    prediction_file = 'predictions_' + file_set_name + '.npy'
-    img_ind_file = 'image_indices_' + file_set_name + '.npy'
-    patch_labels_file = 'patch_labels_' + file_set_name + '.npy'
+    prediction_file   = 'predictions_'   + file_set_name + '.npy'
+    img_ind_file      = 'image_indices_' + file_set_name + '.npy'
+    patch_labels_file = 'patch_labels_'  + file_set_name + '.npy'
 
-    preds = load_npy(prediction_file, res_path)
-    img_indices = load_npy(img_ind_file, res_path)
-    patch_labs = load_npy(patch_labels_file, res_path)
+    preds       = load_npy(prediction_file,   res_path)
+    img_indices = load_npy(img_ind_file,      res_path)
+    patch_labs  = load_npy(patch_labels_file, res_path)
+    
     return preds, img_indices, patch_labs
 
 

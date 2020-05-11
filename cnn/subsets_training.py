@@ -25,7 +25,7 @@ from cnn.preprocessor.load_data_pascal import load_pascal, construct_train_test_
 
 def train_on_subsets(config):
 
-    
+
     ## Import parameters ======================================================
 
     skip_processing          = config['skip_processing_labels']
@@ -89,6 +89,7 @@ def train_on_subsets(config):
     # Split the dataset
     for split in range(0, CV_SPLITS):
 
+        
         # Split the relevant dataset
         # TODO: Generalize this part to more datasets
         if use_xray_dataset:
@@ -107,36 +108,36 @@ def train_on_subsets(config):
         # For every classifier
         for curr_classifier in range(0, number_classifiers):
             if split == 1:
-                
+
                 print("#####################################################")
                 print("SPLIT :       " + str(split))
                 print("classifier #: " + str(curr_classifier))
-                
+
                 # Initialize the relevant data subset
                 if use_xray_dataset:
-                    
+
                     class_train_subset = ld.get_train_subset_xray(
                         train_only_class,
                         df_bbox_train.shape[0],
                         random_seed   = subset_seeds[curr_classifier],
                         ratio_to_keep = overlap_ratio)
-                    
+
                     print("New subset is :" + str(class_train_subset.shape))
-                    
+
                     df_train_subset = pd.concat([df_bbox_train, class_train_subset])
-                    
+
                     print(df_bbox_train.shape)
                     print(class_train_subset.shape)
-                    
+
                 elif use_pascal_dataset:
                     ## TODO: Not using Pascal?
                     print('Warning: Wrong dataset may be used.')
-                    
+
                     df_train_subset = get_train_subset_mura(
                         df_train,
                         random_seed   = subset_seeds[curr_classifier],
                         ratio_to_keep = overlap_ratio)
-                
+
                 else:
                     df_train_subset = get_train_subset_mura(
                         df_train,
@@ -146,7 +147,7 @@ def train_on_subsets(config):
 
             if train_mode and split == 1:
 
-                
+
                 ## 1. Generate training and validation batches ================
 
                 # Generate training batches
@@ -207,7 +208,7 @@ def train_on_subsets(config):
                     epochs           = nr_epochs,
                     validation_data  = valid_generator,
                     validation_steps = valid_generator.__len__(),
-                    verbose          = 1,
+                    verbose          = 0,
                     callbacks        = [checkpoint_on_epoch_end, lrate]
                 )
 
