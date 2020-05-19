@@ -6,7 +6,7 @@ import numpy as np
 import cnn.nn_architecture.keras_generators as gen
 
 IMAGE_SIZE = 512
-BATCH_SIZE = 1
+BATCH_SIZE = 2
 BOX_SIZE = 16
 
 
@@ -69,7 +69,7 @@ def train_model(config, df_train, df_val, df_test):
         verbose   = 1)
     
     # Model name extension
-    filepath = path_trained+'best_model_'+dataset+"-{epoch:02d}-{val_loss:.2f}.hdf5"
+    filepath = f'{path_trained}_best_model_{dataset}-{epoch:02d}-{val_loss:.2f}.hdf5'
     
     # Save the best model epoch
     checkpoint = ModelCheckpoint(
@@ -111,7 +111,7 @@ def train_model(config, df_train, df_val, df_test):
     print(history.history['keras_accuracy'])
 
     # Save training history to a file
-    np.save(path_results+'train_info_'+dataset+'.npy', history.history)
+    np.save(f'{path_results}train_info_{dataset}.npy', history.history)
 
     # Plot training and validation curves and save to a file
     keras_utils.plot_train_validation(

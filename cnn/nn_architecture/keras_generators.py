@@ -40,7 +40,7 @@ class BatchGenerator(Sequence):
             l_bound = r_bound - self.batch_size
 
         x_batch = np.zeros((r_bound - l_bound, self.net_w, self.net_h, 3))  # input images
-        y_batch = np.zeros((r_bound - l_bound, self.box_size, self.box_size, 14))
+        # y_batch = np.zeros((r_bound - l_bound, self.box_size, self.box_size, 14))
         y_batch = np.zeros((r_bound - l_bound, self.box_size, self.box_size, 1))
 
         instance_count = 0
