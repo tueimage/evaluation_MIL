@@ -295,6 +295,29 @@ def split_test_train_v3(df, splits_nr, test_ratio=0.2, random_state=None):
         # return train_inds, test_inds, df.iloc[train_inds], df.iloc[test_inds]
 
 
+def split_train_test(df, n_splits, test_ratio = 0.2, random_state = None):
+    
+    # shuffle split ensuring that same patient ID is only in test or train
+    gss = GroupShuffleSplit(n_splits=n_splits, test_size=test_ratio, random_state=random_state)
+    splits_iter = gss.split(df, groups=df['Patient ID'])
+
+    idx_train = []
+    idx_test  = []
+    df_train = []
+    df_test  = []
+        
+    for split in splits_iter:
+        train_inds, test_inds = split
+        
+        idx_train.append(train_inds)
+        df_train.append(df.iloc[train_inds])
+        
+        idx_test.append(test_inds)
+        df_test.append(df.iloc[test_inds])
+            
+    return idx_train, idx_test, df_train, df_test
+    
+
 def split_test_train_stratified(df, test_ration, random_state = None):
     sss = StratifiedShuffleSplit(n_splits=5, test_size=0.5, random_state=0)
 
