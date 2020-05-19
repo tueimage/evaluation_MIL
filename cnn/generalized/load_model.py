@@ -29,8 +29,5 @@ def load_model(config):
 
 
 
-# predict_patch_and_save_results(
-#         model, 'val_set', df_val, True,
-#         BATCH_SIZE_TEST, BOX_SIZE, IMAGE_SIZE, path_results,
-#         True)
+
 

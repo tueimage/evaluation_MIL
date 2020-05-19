@@ -39,6 +39,7 @@ def evaluate_performance(config):
     class_name        = config['class_name']
     dataset_name      = config['model_name']
     pool_method       = config['pooling_operator']
+    mode              = config['mode']
     
     # set manual variables
     image_prediction_method = 'as_production'
@@ -50,7 +51,7 @@ def evaluate_performance(config):
     # generate the files
     image_labels, image_predictions, \
     has_bbox, accurate_localizations, dice_scores, \
-    inst_auc = kp.process_prediction('val_set',
+    inst_auc = kp.process_prediction(mode+'_set',
                                      predict_res_path,
                                      pool_method = pool_method,
                                      img_pred_method = image_prediction_method,

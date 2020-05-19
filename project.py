@@ -6,6 +6,7 @@ from cnn.generalized.import_dataset import import_dataset
 from cnn.generalized.prepare_dataset import prepare_dataset
 from cnn.generalized.train_model import train_model
 from cnn.generalized.load_model import load_model
+from cnn.generalized.predict_patches import predict_patches
 from cnn.generalized.evaluate_performance import evaluate_performance
 
 
@@ -61,7 +62,11 @@ if mode == 'train':
 
 ## ============================================================================
 
-# Load the model.
-model = load_model(config)
+if mode == 'test':
+    
+    # Load the model.
+    model = load_model(config)
+    
+    # predict_patches(config, model, df_test)
 
-evaluate_performance(config)
+    evaluate_performance(config)
