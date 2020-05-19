@@ -128,3 +128,4 @@ dmypy.json
 *.private.yml
 /.idea
 *.yml
+*.hdf5
