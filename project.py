@@ -4,6 +4,7 @@ import pandas as pd
 
 from cnn.generalized.import_dataset import import_dataset
 from cnn.generalized.prepare_dataset import prepare_dataset
+from cnn.generalized.create_subsets import prepare_subsets
 from cnn.generalized.train_model import train_model
 from cnn.generalized.load_model import load_model
 from cnn.generalized.predict_patches import predict_patches
@@ -31,33 +32,43 @@ with open('config_new.yml', 'r') as ymlfile:
 
 ## ============================================================================
 
-dataset = config['dataset']
-mode = config['mode']
+dataset   = config['dataset']
+path_data = config['image_path']
+mode      = config['mode']
 
 
 # # Initialize datasets for training, validation and testing
-# df_labels, df_labels_test = import_dataset(config)
+df_labels, df_labels_test = import_dataset(config)
 
 # # Generate separate datasets for training, validation and testing
 # df_train, df_val, df_test = prepare_dataset(config, df_labels, df_labels_test)
+
+list_df_train, list_df_val, list_df_test = prepare_subsets(config, df_labels, df_labels_test)
+z = 1
+for df_train, df_val, df_test in zip(list_df_train, list_df_val, list_df_test):
+    df_train.to_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_train', 'w')
+    df_val.to_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_val',   'a')
+    df_test.to_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_test',  'a')
+    z += 1
+    
 
 # # Save the databases to a file
 # df_train.to_hdf( str(dataset)+'.hdf5', 'df_train', 'w')
 # df_val.to_hdf(   str(dataset)+'.hdf5', 'df_val',   'a')
 # df_test.to_hdf(  str(dataset)+'.hdf5', 'df_test',  'a')
 
-# del df_labels, df_labels_test
+del df_labels, df_labels_test, z, df_train, df_val, df_test
 
 
 ## ============================================================================
+   
+# Load the databases
+z = 1
+df_train = pd.read_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_train')
+df_val   = pd.read_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_val')
+df_test  = pd.read_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_test')
 
 if mode == 'train':
-    
-    # Load the databases
-    df_train = pd.read_hdf(str(dataset)+'.hdf5', 'df_train')
-    df_val   = pd.read_hdf(str(dataset)+'.hdf5', 'df_val')
-    df_test  = pd.read_hdf(str(dataset)+'.hdf5', 'df_test')
-    
     train_model(config, df_train, df_val, df_test)
 
 ## ============================================================================
