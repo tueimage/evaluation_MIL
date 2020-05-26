@@ -8,8 +8,6 @@ import cnn.nn_architecture.keras_generators as gen
 # extra imports for choosing GPU
 import os
 import tensorflow as tf
-from keras.backend.tensorflow_backend import set_session
-
 
 IMAGE_SIZE = 512
 BATCH_SIZE = 10
@@ -33,10 +31,11 @@ def train_model(config, df_train, df_val, df_test):
     ## Select a custom GPU (Tensorflow v1) ========================================
     
     if config['gpu']:
-        os.environ["CUDA_VISIBLE_DEVICES"] = config['gpu'][0]
-        tfconfig = tf.ConfigProto()
+        #os.environ["CUDA_VISIBLE_DEVICES"] = config['gpu'][0]
+        os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+        tfconfig = tf.compat.v1.ConfigProto()
         tfconfig.gpu_options.per_process_gpu_memory_fraction = config['gpu'][1]
-        set_session(tf.Session(config=tfconfig))
+        tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=tfconfig))
 
 
     ## 1. Generate training and validation batches ============================
