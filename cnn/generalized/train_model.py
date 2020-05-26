@@ -6,7 +6,7 @@ import numpy as np
 import cnn.nn_architecture.keras_generators as gen
 
 IMAGE_SIZE = 512
-BATCH_SIZE = 2
+BATCH_SIZE = 10
 BOX_SIZE = 16
 
 
@@ -69,7 +69,7 @@ def train_model(config, df_train, df_val, df_test):
         verbose   = 1)
     
     # Model name extension
-    filepath = f'{path_trained}_best_model_{dataset}-{epoch:02d}-{val_loss:.2f}.hdf5'
+    filepath = f'{path_trained}_best_model_{dataset}-'+'{epoch:02d}-{val_loss:.2f}.hdf5'
     
     # Save the best model epoch
     checkpoint = ModelCheckpoint(
