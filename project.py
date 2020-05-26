@@ -32,9 +32,9 @@ with open('config_new.yml', 'r') as ymlfile:
 
 ## ============================================================================
 
-dataset   = config['dataset']
-path_data = config['image_path']
-mode      = config['mode']
+dataset      = config['dataset']
+mode         = config['mode']
+path_results = config['results_path']
 
 
 # # Initialize datasets for training, validation and testing
@@ -44,11 +44,12 @@ df_labels, df_labels_test = import_dataset(config)
 # df_train, df_val, df_test = prepare_dataset(config, df_labels, df_labels_test)
 
 list_df_train, list_df_val, list_df_test = prepare_subsets(config, df_labels, df_labels_test)
-z = 1
+
+z = 0
 for df_train, df_val, df_test in zip(list_df_train, list_df_val, list_df_test):
-    df_train.to_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_train', 'w')
-    df_val.to_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_val',   'a')
-    df_test.to_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_test',  'a')
+    df_train.to_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_train', 'w')
+    df_val.to_hdf(  f'{path_results+dataset}_labels_{z}.hdf5', 'df_val',   'a')
+    df_test.to_hdf( f'{path_results+dataset}_labels_{z}.hdf5', 'df_test',  'a')
     z += 1
     
 
@@ -63,12 +64,13 @@ del df_labels, df_labels_test, z, df_train, df_val, df_test
 ## ============================================================================
    
 # Load the databases
-z = 1
-df_train = pd.read_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_train')
-df_val   = pd.read_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_val')
-df_test  = pd.read_hdf(f'{path_data+dataset}_{z}.hdf5', 'df_test')
-
 if mode == 'train':
+    
+    z = 0
+    df_train = pd.read_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_train')
+    df_val   = pd.read_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_val')
+    df_test  = pd.read_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_test')
+
     train_model(config, df_train, df_val, df_test)
 
 ## ============================================================================
