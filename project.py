@@ -30,15 +30,6 @@ config = load_config(args.config_path)
 #     config = yaml.load(ymlfile)
 
 
-## Select a custom GPU (Tensorflow v1) ========================================
-
-if config['gpu']:
-    os.environ["CUDA_VISIBLE_DEVICES"] = config['gpu'][0]
-    tfconfig = tf.ConfigProto()
-    tfconfig.gpu_options.per_process_gpu_memory_fraction = config['gpu'][1]
-    session = tf.Session(config=tfconfig)
-
-
 ## ============================================================================
 
 dataset      = config['dataset']
