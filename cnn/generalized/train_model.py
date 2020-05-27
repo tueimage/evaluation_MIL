@@ -28,11 +28,10 @@ def train_model(config, df_train, df_val, df_test):
     lr                 = config['lr']
 
 
-    ## Select a custom GPU (Tensorflow v1) ========================================
+    ## Select a custom GPU (Tensorflow v1) ====================================
     
     if config['gpu']:
-        #os.environ["CUDA_VISIBLE_DEVICES"] = config['gpu'][0]
-        os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+        os.environ["CUDA_VISIBLE_DEVICES"] = config['gpu'][0]
         tfconfig = tf.compat.v1.ConfigProto()
         tfconfig.gpu_options.per_process_gpu_memory_fraction = config['gpu'][1]
         tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=tfconfig))
