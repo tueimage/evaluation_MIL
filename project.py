@@ -64,12 +64,13 @@ if mode == 'prepare':
 ## ============================================================================
    
 # Load the databases
-if mode == 'train':
-    
+if mode == 'train' or mode == 'test':
     z = 0
+    df_test  = pd.read_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_test')
+
+if mode == 'train':
     df_train = pd.read_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_train')
     df_val   = pd.read_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_val')
-    df_test  = pd.read_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_test')
 
     train_model(config, df_train, df_val, df_test)
 
@@ -81,6 +82,6 @@ if mode == 'test':
     # Load the model.
     model = load_model(config)
     
-    # predict_patches(config, model, df_test)
+    predict_patches(config, model, df_test)
 
     evaluate_performance(config)
