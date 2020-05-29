@@ -4,8 +4,21 @@ from cnn.nn_architecture.custom_loss import keras_loss_v3_nor
 from cnn.nn_architecture.custom_performance_metrics import keras_accuracy, \
     accuracy_asloss, accuracy_asproduction, keras_binary_accuracy
 
+# extra imports for choosing GPU
+import os
+import tensorflow as tf
 
 def load_model(config):
+
+    ## Select a custom GPU (Tensorflow v1) ====================================
+
+    if config['gpu']:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config['gpu'][0]
+        tfconfig = tf.compat.v1.ConfigProto()
+        tfconfig.gpu_options.per_process_gpu_memory_fraction = config['gpu'][1]
+        tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=tfconfig))
+    
+    print(os.environ["CUDA_VISIBLE_DEVICES"])    
 
     ## Import parameters
     # reg_weight         = config['reg_weight']
