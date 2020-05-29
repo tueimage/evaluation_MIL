@@ -46,7 +46,7 @@ def build_model(reg_weight):
     return model
 
 
-def step_decay(epoch, lr, decay=None):
+def step_decay(epoch, lr, decay=0.1):
     '''
     :param epoch: current epoch
     :param lr: current learning rate
