@@ -12,12 +12,6 @@ from cnn.generalized.predict_patches import predict_patches
 from cnn.generalized.evaluate_performance import evaluate_performance
 
 
-## Select a custom GPU (Tensorflow v1) ========================================
-
-if config['gpu']:
-    os.environ["CUDA_VISIBLE_DEVICES"] = config['gpu'][0]
-
-
 ## Add handler for the global configuration file ==============================
 
 def load_config(path):
@@ -34,6 +28,12 @@ config = load_config(args.config_path)
 
 # with open('config_new.yml', 'r') as ymlfile:
 #     config = yaml.load(ymlfile)
+
+
+## Select a custom GPU (Tensorflow v1) ========================================
+
+if config['gpu']:
+    os.environ["CUDA_VISIBLE_DEVICES"] = config['gpu'][0]
 
 
 ## ============================================================================
