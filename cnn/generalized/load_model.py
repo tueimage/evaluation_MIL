@@ -17,17 +17,15 @@ def load_model(config):
         tfconfig = tf.compat.v1.ConfigProto()
         tfconfig.gpu_options.per_process_gpu_memory_fraction = config['gpu'][1]
         tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=tfconfig))
-    
-    print(os.environ["CUDA_VISIBLE_DEVICES"])    
 
     ## Import parameters
     # reg_weight         = config['reg_weight']
     path_trained       = config['trained_models_path']
     model_name         = config['model_name']
-    
+
     # # Configure the network architecture
     # model = keras_model.build_model(reg_weight = reg_weight)
-    
+
     # # Load the weights
     # model.load_weights(path_trained + model_name)
 
@@ -37,10 +35,5 @@ def load_model(config):
                 'keras_binary_accuracy':  keras_binary_accuracy,
                 'accuracy_asloss':        accuracy_asloss,
                 'accuracy_asproduction':  accuracy_asproduction})
-    
+
     return model
-
-
-
-
-
