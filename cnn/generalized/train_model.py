@@ -10,7 +10,7 @@ import os
 import tensorflow as tf
 
 IMAGE_SIZE = 512
-BATCH_SIZE = 10
+BATCH_SIZE = 5
 BOX_SIZE = 16
 
 

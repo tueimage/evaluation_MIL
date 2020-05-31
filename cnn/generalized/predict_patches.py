@@ -1,7 +1,7 @@
 from cnn.keras_preds import predict_patch_and_save_results
 
 IMAGE_SIZE = 512
-BATCH_SIZE = 2
+BATCH_SIZE = 4
 BOX_SIZE = 16
 
 def predict_patches(config, model, df):
