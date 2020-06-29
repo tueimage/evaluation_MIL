@@ -16,8 +16,12 @@ from cnn.generalized.evaluate_performance import evaluate_performance
 ## Add handler for the global configuration file ==============================
 
 def load_config(path):
-    with open(path, 'r') as ymlfile:
-        return yaml.load(ymlfile)
+    if path == None:
+        with open('config_new.yml', 'r') as ymlfile:
+            return yaml.load(ymlfile)
+    else:
+        with open(path, 'r') as ymlfile:
+            return yaml.load(ymlfile)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config_path', type=str,
@@ -28,11 +32,6 @@ config = load_config(args.config_path)
 
 ## ============================================================================
 
-# with open('config_new.yml', 'r') as ymlfile:
-#     config = yaml.load(ymlfile)
-
-
-## Select a custom GPU (Tensorflow v1) ========================================
 ## i. Verify the configuration file
 verify_input(config)
 
@@ -41,10 +40,12 @@ if config['gpu']:
     os.environ["CUDA_VISIBLE_DEVICES"] = config['gpu'][0]
 
 
+dataset   = config['dataset']
+mode      = config['mode']
+path_base = config['project_path']
 
-dataset      = config['dataset']
-mode         = config['mode']
-path_results = config['results_path']
+
+## ----------------------------------------------------------------------------
 
 if mode == 'prepare':
     
@@ -58,9 +59,9 @@ if mode == 'prepare':
     # Save the databases to a file
     z = 0
     for df_train, df_val, df_test in zip(list_df_train, list_df_val, list_df_test):
-        df_train.to_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_train', 'w')
-        df_val.to_hdf(  f'{path_results+dataset}_labels_{z}.hdf5', 'df_val',   'a')
-        df_test.to_hdf( f'{path_results+dataset}_labels_{z}.hdf5', 'df_test',  'a')
+        df_train.to_hdf(f'{path_base+dataset}_labels_{z}.hdf5', 'df_train', 'w')
+        df_val.to_hdf(  f'{path_base+dataset}_labels_{z}.hdf5', 'df_val',   'a')
+        df_test.to_hdf( f'{path_base+dataset}_labels_{z}.hdf5', 'df_test',  'a')
         z += 1
         
     # [outdated]
@@ -71,16 +72,16 @@ if mode == 'prepare':
     del df_labels, df_labels_test, z, df_train, df_val, df_test
 
 
-## ============================================================================
+## ----------------------------------------------------------------------------
    
 # Load the databases
 if mode == 'train' or mode == 'test':
     z = 0
-    df_test  = pd.read_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_test')
+    df_test  = pd.read_hdf(f'{path_base+dataset}_labels_{z}.hdf5', 'df_test')
 
 if mode == 'train':
-    df_train = pd.read_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_train')
-    df_val   = pd.read_hdf(f'{path_results+dataset}_labels_{z}.hdf5', 'df_val')
+    df_train = pd.read_hdf(f'{path_base+dataset}_labels_{z}.hdf5', 'df_train')
+    df_val   = pd.read_hdf(f'{path_base+dataset}_labels_{z}.hdf5', 'df_val')
 
     train_model(config, df_train, df_val, df_test)
 
