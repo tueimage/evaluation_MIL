@@ -3,6 +3,7 @@ import yaml
 import pandas as pd
 import os
 
+from cnn.generalized.verify_input import verify_input
 from cnn.generalized.import_dataset import import_dataset
 from cnn.generalized.prepare_dataset import prepare_dataset
 from cnn.generalized.create_subsets import prepare_subsets
@@ -25,18 +26,21 @@ parser.add_argument('-c', '--config_path', type=str,
 args   = parser.parse_args()
 config = load_config(args.config_path)
 
+## ============================================================================
 
 # with open('config_new.yml', 'r') as ymlfile:
 #     config = yaml.load(ymlfile)
 
 
 ## Select a custom GPU (Tensorflow v1) ========================================
+## i. Verify the configuration file
+verify_input(config)
 
+## ii. Select a custom GPU (Tensorflow v1)
 if config['gpu']:
     os.environ["CUDA_VISIBLE_DEVICES"] = config['gpu'][0]
 
 
-## ============================================================================
 
 dataset      = config['dataset']
 mode         = config['mode']
