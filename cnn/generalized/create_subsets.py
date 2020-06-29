@@ -109,7 +109,7 @@ def create_subset(df_class_train, df_bbox_train, seed, ratio):
     ''''''
     # Total observations that need to be drawn from the classification training set.
     # If there is a separate training bbox (e.g. X-ray dataset)
-    if df_bbox_train:
+    if bool(df_bbox_train.size):
         obs_to_keep = np.ceil(ratio * (len(df_class_train) + len(df_bbox_train))) - len(df_bbox_train)
    
     # If there is no separate training bbox (e.g. MURA dataset)
@@ -172,29 +172,32 @@ def prepare_subsets(config, df_labels, df_labels_test=None):
         df_class_val = col_df_class_val
     
         # Split the localization dataset into training and testing
-        _, _, \
-            df_bbox_train, df_bbox_test   = ld.split_train_test(
-                                               df_bbox,
-                                               nr_splits,
-                                               test_ratio   = 0.2,
-                                               random_state = 1)
+        if bool(df_bbox.size):
+            _, _, \
+                df_bbox_train, df_bbox_test   = ld.split_train_test(
+                                                   df_bbox,
+                                                   nr_splits,
+                                                   test_ratio   = 0.2,
+                                                   random_state = 1)        
+        else:
+            df_bbox_train, df_bbox_test = [[pd.DataFrame()],[pd.DataFrame()]]
         
-       
         df_val    = df_class_val
         df_train = []
         df_test = []
         
-        
         for idx in range(nr_splits):
             print('From ' + str(df_class_train[idx].shape))
-            df_class_train[idx] = create_subset(df_class_train[idx], df_bbox_train, 1, subset_size)
+            df_class_train[idx] = create_subset(df_class_train[idx], df_bbox_train[idx], 1, subset_size)
             print('to ' + str(df_class_train[idx].shape))
             print('with bbox ' + str(df_bbox_train[idx].shape) + '\n')
-            
+        
+        # Combine bags and instances to form a single dataset
         for idx in range(nr_splits):
             df_train.append(pd.concat([df_class_train[idx], df_bbox_train[idx]]))
-            df_test.append(pd.concat([df_class_test[idx],  df_bbox_test[idx]]))
-            
+            df_test.append( pd.concat([df_class_test[idx],  df_bbox_test[idx]]))
+        
+        # Remove redundant columns
         for idx in range(nr_splits):
             df_train[idx] = ld.keep_index_and_1diagnose_columns(df_train[idx], col_patches)
             df_val[idx]   = ld.keep_index_and_1diagnose_columns(df_val[idx],   col_patches)

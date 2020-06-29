@@ -1,11 +1,42 @@
 # Load or create an image database.
 
+from pathlib import Path
 import pandas as pd                        # to import .csv files as a database
 import cnn.preprocessor.load_data as ld    # preprocess X-Ray dataset
 import cnn.preprocessor.load_data_mura as ldm    # preprocess MURA dataset
-
+import cnn.preprocessor.load_data_amd as lda
 PATCH_SIZE = 16
 
+
+def create_dataset(path_image, dataset, class_name):
+    
+    df = pd.DataFrame()
+    
+    df['Dir Path'] = None
+    df['Label'] = None
+    df[f'{class_name}_loc'] = None
+    
+    images_path_list = []
+    labels_list = []
+    instance_labels = []
+
+    for src_path in Path(path_image).glob('**/*.bmp'):
+        parent_folder_name = src_path.parts[-2]
+        images_path_list.append(str(src_path))
+        bag_label    = int(parent_folder_name.__contains__(f'{class_name}'))
+        
+        # Old thing from the PASCAL dataset
+        label_string = parent_folder_name.split('_')[-1]
+        
+        labels_list.append(label_string)
+        instance_labels.append(ldm.create_instance_labels(bag_label, 16))
+        
+    df['Dir Path'] = images_path_list
+    df['Label'] = labels_list
+    df[f'{class_name}_loc'] = instance_labels
+    df['Patient ID'] = range(df['Dir Path'].size)
+    
+    return df
 
 def import_dataset(config):
     '''
@@ -76,3 +107,10 @@ def import_dataset(config):
                                                         "test_mura")
 
             return df_labels, df_labels_test
+        
+        
+        else:
+            # PASCAL and AMD
+            df_labels = create_dataset(path_image, dataset, class_name)
+            
+            return df_labels, None
