@@ -1,27 +1,30 @@
+# Computes the performance of the model.
+
 import argparse
 import yaml
 from cnn import keras_preds
 from cnn.keras_utils import build_path_results, make_directory
 
+## Definitions ----------------------------------------------------------------
 
 def load_config(path):
+    '''Load the global configuration file.'''
     with open(path, 'r') as ymlfile:
         return yaml.load(ymlfile)
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--config_path', type=str,
                     help='Provide the file path to the configuration')
-
-args = parser.parse_args()
+args   = parser.parse_args()
 config = load_config(args.config_path)
 
-results_path = config['results_path']
-class_name = config['class_name']
-dataset_name = config['dataset_name']
+results_path     = config['results_path']
+class_name       = config['class_name']
+dataset_name     = config['dataset_name']
 pooling_operator = config['pooling_operator']
 
 
+# set manual variables
 image_prediction_method = 'as_production'
 predictions_unique_name = 'test_set_CV1_0'
 predictions_folder_name = 'subsets' #this could be CV or exploratory_exp, all 3 of them can have prediction files
@@ -45,6 +48,9 @@ r = {'nor': 0,
      "max": 0
      }
 
+## Generate supportive files --------------------------------------------------
+
+# generate the files
 image_labels, image_predictions, \
 has_bbox, accurate_localizations, dice_scores = keras_preds.process_prediction(config,
                                                                                predictions_unique_name,

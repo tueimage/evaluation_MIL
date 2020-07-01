@@ -10,6 +10,9 @@ from cnn.nn_architecture.custom_performance_metrics import keras_accuracy, accur
 
 
 def build_model(reg_weight):
+    '''Create the model architecture.'''
+
+    # Build preprocessing model ResNet50
     base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(512, 512, 3))
     ## freezing layers
     #for layer in base_model.layers:
@@ -26,17 +29,18 @@ def build_model(reg_weight):
 
     last = base_model.output
 
+    # Build paper model
     downsamp = MaxPooling2D(pool_size=1, strides=1, padding='Valid')(last)
 
     recg_net = Conv2D(512, kernel_size=(3,3), padding='same', activation='relu', activity_regularizer=regularizers.l2(reg_weight))(downsamp)
     recg_net = BatchNormalization()(recg_net)
     recg_net = Conv2D(1, (1,1), padding='same', activation='sigmoid')(recg_net)
     model = Model(base_model.input, recg_net)
-    
+
     return model
 
 
-def step_decay(epoch, lr, decay=None):
+def step_decay(epoch, lr, decay=0.1):
     '''
     :param epoch: current epoch
     :param lr: current learning rate
@@ -44,9 +48,10 @@ def step_decay(epoch, lr, decay=None):
     '''
     if not decay:
         return lr
+
     else:
         lrate = lr
-        if(epoch%10==0) and (epoch > 0):
+        if (epoch % 10 == 0) and (epoch > 0):
             lrate = lr * decay
         return lrate
 
@@ -56,15 +61,32 @@ def dynamic_lr(epoch):
 
 
 def compile_model_accuracy(model, lr, pool_op):
-    loss_f ={'nor': keras_loss_v3_nor,
-            'mean': keras_loss_v3_mean,
-             'lse': keras_loss_v3_lse,
-             'lse01': keras_loss_v3_lse01,
-             'max': keras_loss_v3_max
-     }
-    optimizer = Adam(lr=lr)
-    model.compile(optimizer=optimizer,
-                  loss=loss_f[pool_op],
-                  metrics=[keras_accuracy, accuracy_asloss])
-    return model
+    '''
+    Compiles the model with ADAM optimizer and metrics:
+        accuracy, binary accuracy, accuracy as loss, accuracy as production.
 
+    Parameters
+    ----------
+    model :    Keras model.
+    lr:        Learning rate.
+    pool_op :  Loss operator.
+
+    Returns
+    -------
+    model :    Keras model.
+
+    '''
+
+    # Loss functions
+    loss_f = {'nor':    keras_loss_v3_nor,
+              'mean':   keras_loss_v3_mean,
+              'lse':    keras_loss_v3_lse,
+              'lse01':  keras_loss_v3_lse01,
+              'max':    keras_loss_v3_max}
+
+    # Initialize ADAM optimizer
+    optimizer = Adam(lr=lr)
+    model.compile(optimizer = optimizer,
+                  loss      = loss_f[pool_op],
+                  metrics   = [keras_accuracy, accuracy_asloss])
+    return model

@@ -1,35 +1,28 @@
 import pandas as pd
-from scipy.optimize import curve_fit
-
-path = "C:/Users/s161590/Documents/Project_li/"
-
-bag_auc = [0.74, 0.84, 0.99]
-apj = [0.23, 0.66, 0.54]
-sp = [0.32, 0.88, 0.82]
-data_names = ['X-Ray', 'MURA', 'Pascal VOC']
-scores = ['apj', 's']
-
-d = {'Dataset':['X-Ray', 'MURA',' Pascal VOC','X-Ray', 'MURA',' Pascal VOC'],
-     'Stability Index':['APJ', 'APJ', 'APJ', 'S', 'S', 'S'],
-     'Stability Score':[0.23, 0.61, 0.54, 0.32, 0.84, 0.82],
-     'Bag AUC': [0.72, 0.84, 0.99, 0.72, 0.84, 0.99]}
-df = pd.DataFrame(data=d)
-
 import matplotlib.cm as cm
-import  numpy as np
+import numpy as np
+import seaborn as sns; sns.set()
+import matplotlib.pyplot as plt
+
+from scipy.optimize import curve_fit
 
 
 def make_scatterplot(y_axis_collection, y_axis_title, x_axis_collection, x_axis_title, x_axis_collection2, res_path):
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1, axisbg="1.0")
+    """"""
+    
+    fig    = plt.figure()
+    #ax     = fig.add_subplot(1, 1, 1, axisbg="1.0")
+    ax     = fig.add_subplot(1, 1, 1)
     colors = cm.rainbow(np.linspace(0, 1, len(y_axis_collection)))
-    for x, x2, y, color, sn in zip(x_axis_collection, x_axis_collection2, y_axis_collection, colors, data_names):
+    
+    for (x, x2, y, color, sn) in zip(x_axis_collection, x_axis_collection2, y_axis_collection, colors, data_names):
         # x, y = pearson_corr_col, spearman_corr_col
         ax.scatter(x, y, color=color, s=5, label=sn, marker='o')
         ax.scatter(x, y, color=color, edgecolors='none', s=70, marker='v',
                    vmin=0, vmax=1)
         ax.scatter(x2, y, color=color, edgecolors='none', s=70, marker='s',
                    vmin=0, vmax=1)
+    
     ax.scatter(x, y, color=color, edgecolors='none', s=70, marker='v')
     plt.xlabel(x_axis_title)
     plt.ylabel(y_axis_title)
@@ -41,23 +34,7 @@ def make_scatterplot(y_axis_collection, y_axis_title, x_axis_collection, x_axis_
     fig.savefig(res_path +  'scatter_' + x_axis_title + '_' + y_axis_title + '.jpg', bbox_inches='tight')
 
     plt.close(fig)
-
-make_scatterplot(bag_auc, 'Bag AUC', apj, 'score',sp, path)
-
-
-
-import seaborn as sns; sns.set()
-
-import matplotlib.pyplot as plt
-
-sns.set_style("whitegrid")
-fig = plt.figure()
-ax = sns.scatterplot(x='Stability Score', y='Bag AUC', data=df, style='Stability Index', hue='Dataset', s=100)
-plt.xlim([0, 1])
-plt.ylim([0, 1.1])
-# ax = sns.scatterplot(x=apj, y=bag_auc, style=data_names)
-fig.savefig(path + 'scatter_.jpg', bbox_inches='tight')
-plt.show()
+    return
 
 
 def exp_fit_func(x, a, b, c):
@@ -67,7 +44,8 @@ def exp_fit_func(x, a, b, c):
 def make_scatterplot_with_errorbar(y_axis_collection, y_axis_title, x_axis_collection, x_axis_title, res_path, y_errors,
                                    fitting_curve = False, error_bar = False, bin_threshold_prefix =None, x_errors=None):
     fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1, axisbg="1.0")
+#    ax = fig.add_subplot(1, 1, 1, axisbg="1.0")
+    ax = fig.add_subplot(1, 1, 1)
     # cmap2 = cm.get_cmap('tab20c')  # type: # matplotlib.colors.ListedColormap
     # colors = cmap2.colors  # type: # list
     # ax.set_prop_cycle(color=colors)
@@ -75,14 +53,18 @@ def make_scatterplot_with_errorbar(y_axis_collection, y_axis_title, x_axis_colle
     # colors = cm.rainbow(np.linspace(0, 1, len(y_axis_collection)))
     if y_errors is None:
         y_errors = np.zeros(y_axis_collection.shape)
+        
     if x_errors is None:
         x_errors = np.zeros(np.array(x_axis_collection).shape)
+    
     for x, y, y_error_bar, x_error_bar in zip(x_axis_collection, y_axis_collection, y_errors, x_errors):
         # x, y = pearson_corr_col, spearman_corr_col
         ax.scatter(x, y, edgecolors='none', s=30, color="b")
         if (error_bar==True) and (y_errors is not None):
             ax.errorbar(x, y, xerr=x_error_bar, yerr=y_error_bar, color="b")
+    
     ax.set(xlim=(0, 1), ylim=(0, 1))
+    
     if fitting_curve:
         popt, pcov = curve_fit(exp_fit_func, x_axis_collection, y_axis_collection, maxfev=1000)
         z = np.polyfit(x_axis_collection, y_axis_collection, 1)
@@ -112,7 +94,42 @@ def make_scatterplot_with_errorbar(y_axis_collection, y_axis_title, x_axis_colle
         fig.savefig(res_path +  'scatter_' + x_axis_title + '_' + y_axis_title + '.jpg', bbox_inches='tight')
 
     plt.close(fig)
+    return
 
+
+# --------------------------------------------------------------------------- #
+
+#path        = "C:/Users/s161590/Documents/Project_li/"
+path        = "C:/Users/s161936/Documents/TUe/Kwartiel 15/Project Stability/01. Github/results/"
+bag_auc     = [0.74, 0.84, 0.99]
+apj         = [0.23, 0.66, 0.54]
+sp          = [0.32, 0.88, 0.82]
+data_names  = ['X-Ray', 'MURA', 'Pascal VOC']
+scores      = ['apj', 's']
+
+d = { 'Dataset':          ['X-Ray', 'MURA', 'Pascal VOC', 'X-Ray', 'MURA', 'Pascal VOC'],
+      'Stability Index':  ['APJ',   'APJ',  'APJ',        'S',     'S',    'S'         ],
+      'Stability Score':  [0.23,    0.61,   0.54,         0.32,    0.84,   0.82        ],
+      'Bag AUC':          [0.72,    0.84,   0.99,         0.72,    0.84,   0.99        ]}
+
+df = pd.DataFrame(data=d)
+
+# --- #
+
+make_scatterplot(bag_auc, 'Bag AUC', apj, 'score', sp, path)
+
+# --- #
+
+sns.set_style("whitegrid")
+fig = plt.figure()
+ax = sns.scatterplot(x='Stability Score', y='Bag AUC', data=df, style='Stability Index', hue='Dataset', s=100)
+plt.xlim([0, 1])
+plt.ylim([0, 1.1])
+# ax = sns.scatterplot(x=apj, y=bag_auc, style=data_names)
+fig.savefig(path + 'scatter_.jpg', bbox_inches='tight')
+plt.show()
+
+# --- #
 
 mean_dice = [0.409994878, 0.414859883, 0.720072689, 0.618433118, 0.143922518, 0.724336751, 0.087368421, 0.419662813,
              0.367814213, 0.579860808, 0.596268861, 0, 0.186665339, 0.654044785, 0.420514651, 0.247710076, 0.751606661,

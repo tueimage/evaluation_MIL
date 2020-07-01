@@ -3,7 +3,7 @@ import tensorflow as tf
 import random as rn
 import yaml
 import argparse
-import os
+#import os
 
 from cnn.subsets_training import train_on_subsets
 

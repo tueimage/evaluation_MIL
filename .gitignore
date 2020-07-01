@@ -127,3 +127,5 @@ dmypy.json
 # Private yaml config
 *.private.yml
 /.idea
+*.yml
+*.hdf5
